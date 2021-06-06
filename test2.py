@@ -1,3 +1,15 @@
+
+# -*- encoding: utf-8 -*-
+'''
+@File    :   test2.py
+@Time    :   2021/06/06 17:09:03
+@Author  :   ZH_Somin 
+@Version :   1.0
+@Contact :   achouloves@163.com
+'''
+
+# here put the import lib
+
 import cv2
 import numpy as np
 import tensorflow as tf

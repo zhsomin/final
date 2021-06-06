@@ -1,4 +1,17 @@
+# -*- encoding: utf-8 -*-
+# -*- encoding: utf-8 -*-
+'''
+@File    :   main.py
+@Time    :   2021/06/06 17:08:33
+@Author  :   ZH_Somin 
+@Version :   1.0
+@Contact :   achouloves@163.com
+'''
+
+# here put the import lib
+
 # -*- coding: UTF-8 -*-
+
 import cv2
 import os
 import numpy as np
@@ -9,6 +22,7 @@ import json
 import hashlib
 import hmac
 from PIL import Image
+
 
 #在这里面需要加入阿里云的三元组相关信息
 options = {
@@ -22,6 +36,7 @@ HOST = options['productKey'] + '.iot-as-mqtt.'+options['regionId']+'.aliyuncs.co
 PORT = 1883 
 PUB_TOPIC = "/sys/" + options['productKey'] + "/" + options['deviceName'] + "/thing/event/property/post";
 
+###连接阿里云需要的几个函数
 def on_connect(client, userdata, flags, rc):
     print("Connected with result code "+str(rc))
     # client.subscribe("the/topic")
@@ -44,12 +59,11 @@ def getAliyunIoTClient():
 	client.username_pw_set(USER_NAME, PWD)
 	return client
 
-
-
+#识别需要用到的数据
 tar_temp = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, '.']
 
 
-# 定义一个阈值函数，将数码管部分取出来，根据实际情况进行相应修改，找到最优参数
+# 定义一个阈值函数，将数码管部分取出来，这里属于对采集到的图片进行预处理，先进行平滑滤波，进行二值化操作，对图像进行形态学的操作 包括
 def thresholding_inv(image):
     kernel = np.ones((3,3),np.uint8) 
     # 定义膨胀核心，根据实际情况进行修改
@@ -82,7 +96,7 @@ while True:
         img = Image.open('./image/112.jpg')
         size_img = img.size
         print(size_img)
-        # 准备将图片切割成4张小图片,这里后面的2是开根号以后的数，比如你想分割为9张，将2改为3即可
+        # 准备将图片切割成4张小图片,这里后面的2是开根号以后的数，比如你想分割为9张，将2改为3即可     这里感谢师弟！
         weight = int(size_img[0] // 2)
         height = int(size_img[1] // 2)
         names = locals()
@@ -147,7 +161,6 @@ while True:
                     num_tup = sorted(mm.items(), key=lambda x: x[0])
                     # 将数字列表连接为字符串
                     a =  names['num' + str(j)+str(k) ] =(''.join([str(i[1]) for i in num_tup]))
-                    a=  names['numn' + str(j)+str(k) ] = float(a)
                     # print(b)
                     # try:
                     #     
@@ -160,12 +173,6 @@ while True:
                     # cv2.namedWindow("Resulting Image with Rectangular ROIs", cv2.WINDOW_NORMAL)
                     # cv2.imshow("Resulting Image with Rectangular ROIs", im)
                     # cv2.waitKey(0)
-        # data = {
-        # "V11": num00,
-        # "V12": num01,
-        # "A11": num10,
-        # "A12": num11 
-        # }
         payload_json = {
 		'id': int(time.time()),
 		'params': {
@@ -178,9 +185,5 @@ while True:
 	    }
         print('send data to iot server: ' + str(payload_json))
         client.publish(PUB_TOPIC,payload=str(payload_json),qos=1)
-        
-        # print(data)
-        # param = json.dumps(data)
-        # client.publish('LH', payload=param, qos=0, retain=False)
         time.sleep(5)
 client.loop_forever()
